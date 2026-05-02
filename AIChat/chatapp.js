@@ -1,10 +1,14 @@
 import express from 'express';
-const app = express();
-import 'dotenv/config'
+import 'dotenv/config';
+import cors from 'cors'
 import chatcontroller from './controller/chatcontroller.js';
 import bodyParser from 'body-parser';
 const PORT = process.env.PORT ;
-app.use(bodyParser.json())
+const app = express();
+app.use(cors({
+    origin : "*"
+}));
+app.use(bodyParser.json());
 app.post('/send-msg', chatcontroller.CallChat);
 
 app.listen(PORT,()=>{

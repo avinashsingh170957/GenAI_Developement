@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #343541;
+            color: white;
+            margin: 0;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .user {
+            background: #0b93f6;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background: #444654;
+            align-self: flex-start;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: #40414f;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background: #19c37d;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="question" placeholder="Ask something..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const messagesDiv = document.getElementById("messages");
+
+    function addMessage(text, type) {
+        const msg = document.createElement("div");
+        msg.classList.add("message", type);
+        msg.innerText = text;
+        messagesDiv.appendChild(msg);
+
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById("question");
+        const question = input.value.trim();
+
+        if (!question) return;
+
+        // Show user message
+        addMessage(question, "user");
+        input.value = "";
+
+        // Show loading message
+        const loading = document.createElement("div");
+        loading.classList.add("message", "bot");
+        loading.innerText = "Typing...";
+        messagesDiv.appendChild(loading);
+
+        try {
+            const response = await fetch("http://localhost:3000/send-msg", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message : question })
+            });
+
+            const data = await response.json();
+
+            loading.remove();
+
+            // Bind response
+            addMessage(data.answer  || "No response", "bot");
+
+        } catch (error) {
+            loading.remove();
+            addMessage("Error connecting to server", "bot");
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
