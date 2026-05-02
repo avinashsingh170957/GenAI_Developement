@@ -1,18 +1,36 @@
 import Ollama from "ollama";
+import readline from 'node:readline/promises';
+import { stdin, stdout } from "node:process";
 
-async function call_model(msg){
- const response = await Ollama.chat(
-    {
-        model : "phi3:mini",
-        messages : [{
-            role : "user",
-            content : msg
-        }]
+async function call_model() {
+    const RL = readline.createInterface({
+        input: stdin,
+        output: stdout
+    });
+
+    while (true) {
+        const question = (await RL.question("enter your question "))
+            .trim()
+            .toLowerCase();
+
+        if (["bye", "exit", "close"].includes(question)) {
+            break;
+        }
+
+        const response = await Ollama.chat({
+            model: "phi3:mini",
+            messages: [
+                {
+                    role: "user",
+                    content: question
+                }
+            ]
+        });
+
+        console.log("response:", response.message.content);
     }
- )
- console.log("response",response.message.content);
- return;
- 
+
+    RL.close(); // ✅ close once
 }
 
-call_model("hello how are you");
+call_model();
