@@ -16,7 +16,7 @@ class ChatController {
             return res.status(200).json({
                 success: true,
                 question : `you asking about ${message}`,
-                answer : `answer is ${response}`
+                answer : `${response}`
             });
 
         } catch (error) {
