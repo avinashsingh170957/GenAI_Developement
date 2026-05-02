@@ -1,6 +1,5 @@
 import Ollama from "ollama";
 class chatmodels {
-
     async chatserver(msg) {
         return new Promise(async (resolve, reject) => {
             try {
