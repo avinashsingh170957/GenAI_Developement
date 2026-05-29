@@ -1,47 +1,109 @@
-import { response } from "express";
-import Ollama from "ollama";
 import Groq from "groq-sdk";
+import tools from "../tools.js";
+import GetExpence from "./GetExpence.js";
+
 const groq = new Groq({
-  apiKey: process.env.groqkey,
+    apiKey: process.env.groqkey,
 });
-//console.log(process.env.groqkey);
 
-const message = [
-    {
-        role: "system",
-        content: `you are smart expence assistance !.
-        users are provide his expence details you can analise.`
-    }
-]
+async function expencereader(expence, msg) {
+    try {
 
-async function expencereader(expence) {
-    return new Promise(async (resolve,reject)=>{
-try {
-        message.push({
-            role: 'user',
-            content: `
-                Analyze this expense data and give:
-                1. Total expense
-                2. Category wise summary
-                3. Highest expense
-                4. Spending insights
-                Data:
-                ${JSON.stringify(expence, null, 2)}`
-        });
-        console.log(message);
-        
-        const response = await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages: message
-                });
-        //console.log(response.choices[0].message.content);
-        resolve(response.choices[0].message.content)
+        console.log("MSG:", msg);
+
+        const messages = [
+            {
+                role: "system",
+                content: `
+                You are a helpful expense assistant.
+
+                Rules:
+                - For greetings, general chat, or unrelated questions, respond normally.
+                - Only use expense tools when the user asks about expenses, spending, reports, monthly reports, yearly reports, or expense analysis.
+                `
+            },
+            {
+                role: "user",
+                content: msg
+            }
+        ];
+
+        const expenseKeywords = [
+            "expense",
+            "expenses",
+            "spending",
+            "report",
+            "monthly",
+            "yearly",
+            "date wise",
+            "transaction"
+        ];
+
+        const isExpenseQuery = expenseKeywords.some(keyword =>
+            msg.toLowerCase().includes(keyword)
+        );
+
+        if (isExpenseQuery) {
+
+            messages.push({
+                role: "system",
+                content: `
+                Expense Data:
+
+                ${JSON.stringify(expence, null, 2)}
+
+                Use this data whenever the user asks for expense information.
+                `
+            });
+
+        }
+
+        console.log("Expense Query:", isExpenseQuery);
+        console.log(JSON.stringify(messages, null, 2));
+
+        const requestBody = {
+            model: "llama-3.3-70b-versatile",
+            messages
+        };
+
+        if (isExpenseQuery) {
+            requestBody.tools = tools;
+        }
+
+        const response = await groq.chat.completions.create(requestBody);
+
+        const toolCalls = response.choices[0].message.tool_calls;
+
+        if (toolCalls?.length) {
+
+            const tool = toolCalls[0];
+
+            if (tool.function.name === "GetExpence") {
+
+                const args = JSON.parse(tool.function.arguments);
+
+                const result = await GetExpence(
+                    expence,
+                    args.filterType,
+                    args.value
+                );
+
+                console.log(result);
+                return {
+                    type: "message",
+                    data: result
+                };
+            }
+        }
+        return {
+            type: "message",
+            data: response.choices[0].message.content
+        };
 
     } catch (error) {
-        console.log(`Reading Problem`, error);
-        reject(error)
+        console.error("Reading Problem:", error);
+        throw error;
     }
-    })    
 }
 
 export default expencereader;

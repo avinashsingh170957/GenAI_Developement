@@ -2,15 +2,13 @@ import ReadExpence from "../models/ReadExpence.js";
 import expencereader from "../tools/expencereader.tool.js";
 
 const GetExpence = async (req, res) => {
-
     try {
-
-        const response = await ReadExpence();        
-        const expenceresponse = await expencereader(response)
+        const {msg} = req.body ;
+         const response = await ReadExpence();        
+         const expenceresponse = await expencereader(response,msg)
         return res.status(200).json({
             success: true,
             msg: "Handled",
-            data: response,
             expenceresponse :expenceresponse
         });
 
