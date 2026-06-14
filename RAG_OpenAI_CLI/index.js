@@ -2,7 +2,7 @@ import { stdin, stdout } from "node:process";
 import configDotenv from "dotenv";
 configDotenv.config();
 import Readline from "node:readline/promises";
-import embeddings from "./functions/embedding.js";
+import embeddings, { Chat } from "./functions/embedding.js";
 const RL = Readline.createInterface({
     input: stdin,
     output: stdout
@@ -36,6 +36,7 @@ Choice: `
         }
         else if (question === "2") {
             console.log("Chat selected");
+            await Chat(RL);
         }
         else {
             console.log("Wrong Choice!");
