@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Image OCR</title>
+</head>
+
+<body>
+
+    <h2>Image OCR Upload</h2>
+
+    <input type="file" id="image" accept="image/*">
+
+    <button onclick="upload()">Upload</button>
+
+    <hr>
+
+    <pre id="output"></pre>
+
+    <script>
+
+        async function upload() {
+
+            const file = document.getElementById("image").files[0];
+
+            if (!file) {
+                alert("Please select an image.");
+                return;
+            }
+
+            try {
+
+                const response = await fetch("/process-img", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": file.type
+                    },
+                    body: file
+                });
+
+                const data = await response.json();
+
+                document.getElementById("output").textContent =
+                    JSON.stringify(data, null, 4);
+
+            } catch (err) {
+
+                console.error(err);
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

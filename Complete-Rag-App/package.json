@@ -1,0 +1,19 @@
+{
+  "name": "pdf-portal",
+  "version": "1.0.0",
+  "description": "A complete role-based PDF management app:",
+  "main": "index.js",
+  "scripts": {
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently -k -n BACKEND,FRONTEND -c green,blue \"npm run backend\" \"npm run frontend\"",
+    "install-all": "npm install && npm --prefix backend install && npm --prefix frontend install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
